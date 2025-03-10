@@ -5,7 +5,6 @@
 #include <string.h>
 #include <sys/wait.h>
 
-// Provided wordCounter function
 int wordCounter(const char *word, const char *filename) {
     FILE *file = fopen(filename, "r");
     if (!file)
@@ -23,12 +22,10 @@ int wordCounter(const char *word, const char *filename) {
 const char *keywords[3] = {"WARNING", "ERROR", "ALERT"};
 int signals_arr[3] = {SIGUSR1, SIGUSR2, SIGURG};
 
-// Two pipes per child: p2c (parent->child) and c2p (child->parent)
 int p2c[3][2], c2p[3][2];
-int child_index = -1;    // Set in each child
+int child_index = -1;    
 int child_p2c_fd, child_c2p_fd;
 
-// Signal handler: read filename, count keyword occurrences, send count back
 void signal_handler(int sig) {
     char fname[256];
     read(child_p2c_fd, fname, sizeof(fname));
@@ -36,8 +33,7 @@ void signal_handler(int sig) {
     write(child_c2p_fd, &cnt, sizeof(cnt));
 }
 
-// Termination signal handler for children
-void term_handler(int sig) {
+void termination_handler(int sig) {
     close(child_p2c_fd);
     close(child_c2p_fd);
     exit(0);
@@ -49,7 +45,7 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
     char *filename = argv[1];
-    // Check if the file exists; exit early if it doesn't
+    // Check if the file exists
     if(access(filename, F_OK) == -1) {
         printf("File %s does not exist. Exiting.\n", filename);
         exit(1);
@@ -67,8 +63,8 @@ int main(int argc, char *argv[]) {
         pid_t pid = fork();
         if(pid == 0) { // Child process
             child_index = i;
-            close(p2c[i][1]);   // Close write end in child
-            close(c2p[i][0]);   // Close read end in child
+            close(p2c[i][1]);   
+            close(c2p[i][0]);   
             // Close unused pipes in child
             for(int j = 0; j < 3; j++) {
                 if(j != i) {
@@ -79,14 +75,14 @@ int main(int argc, char *argv[]) {
             child_p2c_fd = p2c[i][0];
             child_c2p_fd = c2p[i][1];
             signal(signals_arr[i], signal_handler);
-            signal(SIGTERM, term_handler);
+            signal(SIGTERM, termination_handler);
             while(1)
                 pause();
             exit(0);
         } else { // Parent process
             pids[i] = pid;
-            close(p2c[i][0]);   // Parent uses write end
-            close(c2p[i][1]);   // Parent uses read end
+            close(p2c[i][0]);   
+            close(c2p[i][1]);   
         }
     }
     
@@ -117,7 +113,6 @@ int main(int argc, char *argv[]) {
         int index = choice - 1;
         char *signal_name = (index == 0) ? "SIGUSR1" : (index == 1) ? "SIGUSR2" : "SIGURG";
         
-        // Print message before sending signal
         printf("Sending %s to child with PID=%d...\n", signal_name, pids[index]);
         write(p2c[index][1], filename, strlen(filename) + 1);
         kill(pids[index], signals_arr[index]);
