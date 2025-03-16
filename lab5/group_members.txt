@@ -1,0 +1,8 @@
+Haidar Abugurain - 202064700
+Worked on refactoring the code to use multiple functions for separation of concerns, and checked that the code comforts with the checklists
+given during the in-person lab. Also, worked on the code's functionality.
+
+Hamza Abdallah - 202044820
+Worked on the code's functionality as well as the checklists given during the in-person lab.
+
+Note: both students worked on the lab individually before knowing that the lab is a group assignment, but then we combined our solutions together and reviewed it.

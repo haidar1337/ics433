@@ -1,7 +1,7 @@
 #!/bin/bash
 # This script generates a sample security log file for the challenge task.
 
-NUM_LINES=1000  # Adjust for file size
+NUM_LINES=100  # Adjust for file size
 OUTPUT_FILE="security_log.txt"
 
 function generate_ip() {
